@@ -1,6 +1,6 @@
 # tetris_app
 
-テトリスを製作します。
+flutterでテトリスを開発していきます。
 
 ## Getting Started
 
