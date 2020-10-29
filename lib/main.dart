@@ -20,6 +20,31 @@ class MyApp extends StatelessWidget {
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           home: Scaffold(
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    FloatingActionButton(
+                      backgroundColor: Colors.amberAccent,
+                      onPressed: () {
+                        model.rotateRight();
+                      },
+                    ),
+                    FloatingActionButton(
+                      backgroundColor: Colors.redAccent,
+                      onPressed: () {
+                        model.rotateLeft();
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 50,
+                ),
+              ],
+            ),
             appBar: AppBar(
               title: Text('TETRIS'),
             ),
@@ -37,8 +62,17 @@ class MyApp extends StatelessWidget {
                       width: 240,
                       height: 480,
                       color: Colors.grey,
-                      child: CustomPaint(
-                        painter: Jmino(xPos: 0, yPos: model.yPos, angle: 0),
+                      child: Stack(
+                        children: [
+                          CustomPaint(
+                            painter: Jmino(
+                              xPos: model.xPos,
+                              yPos: model.yPos,
+                              angle: model.angle,
+                              fixedMino: model.fixedMino,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -46,15 +80,43 @@ class MyApp extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       RaisedButton(
+                        child: const Text('←'),
+                        color: Colors.white,
+                        shape: const CircleBorder(
+                          side: BorderSide(
+                            color: Colors.black,
+                            width: 1,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        onPressed: () {
+                          model.moveLeft();
+                        },
+                      ),
+                      RaisedButton(
                         child: Text('Start'),
                         onPressed: () {
                           model.startTimer();
                         },
                       ),
                       RaisedButton(
-                        child: Text('Stop'),
+                        child: Text('Reset'),
                         onPressed: () {
-                          model.stopTimer();
+                          model.reset();
+                        },
+                      ),
+                      RaisedButton(
+                        child: const Text('→'),
+                        color: Colors.white,
+                        shape: const CircleBorder(
+                          side: BorderSide(
+                            color: Colors.black,
+                            width: 1,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        onPressed: () {
+                          model.moveRight();
                         },
                       ),
                     ],
