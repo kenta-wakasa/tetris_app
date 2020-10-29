@@ -1,74 +1,53 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'mino.dart';
 
 class MainModel extends ChangeNotifier {
   Timer timer;
-  double yPos = 0;
-  double xPos = 0;
-  double angle = 0;
-
-  List<List<double>> nowCollision = [
+  int yPos = 0;
+  int xPos = 0;
+  int angle = 0;
+  int index = 0;
+  int indexMino = 0;
+  List<int> orderMino = [0, 1, 2, 3, 4, 5, 6];
+  List<List<int>> nowCollision = [
     [0, 0],
     [0, 0],
     [0, 0],
     [0, 0]
   ];
+  List<List<int>> fixedMino = [];
 
-  List<List<double>> fixedMino = [];
-
-  final Map<double, List<List<double>>> jMinoCollision = {
-    0: [
-      [-2, -1],
-      [-2, 0],
-      [-1, 0],
-      [0, 0]
-    ],
-    pi / 2: [
-      [-1, -1],
-      [0, -1],
-      [-1, 0],
-      [-1, 1]
-    ],
-    pi: [
-      [-2, 0],
-      [-1, 0],
-      [0, 0],
-      [0, 1]
-    ],
-    (3 * pi) / 2: [
-      [-1, -1],
-      [-1, 0],
-      [-2, 1],
-      [-1, 1]
-    ],
-  };
-
-  startTimer() async {
+  startTimer() {
+    _generateMino();
     this.timer = Timer.periodic(
       Duration(milliseconds: 200),
       (Timer t) {
         this.yPos += 1;
-        if (_isOutOfRange()) {
+        if (_onCollisionEnter()) {
           //ToDo: ミノを固定する
           this.yPos -= 1;
           _updateCollision();
-          for (List<double> e in nowCollision) {
+          for (List<int> e in nowCollision) {
             fixedMino.add([e[0], e[1]]);
           }
-          generateMino();
-          print('add');
+          _canDelete();
+          _generateMino();
         }
-        print(this.fixedMino);
         notifyListeners();
       },
     );
   }
 
-  generateMino() {
+  _generateMino() {
+    if ((this.index % 7) == 0) {
+      this.orderMino.shuffle();
+    }
     this.yPos = 0;
     this.xPos = 0;
     this.angle = 0;
+    this.indexMino = this.orderMino[this.index % 7];
+    this.index += 1;
     _updateCollision();
     notifyListeners();
   }
@@ -83,36 +62,40 @@ class MainModel extends ChangeNotifier {
   }
 
   moveLeft() {
-    this.xPos -= 1.0;
-    if (_isOutOfRange()) {
-      this.xPos += 1.0;
+    this.xPos -= 1;
+    if (_onCollisionEnter()) {
+      this.xPos += 1;
     }
     notifyListeners();
   }
 
   moveRight() {
-    this.xPos += 1.0;
-    if (_isOutOfRange()) {
-      this.xPos -= 1.0;
+    this.xPos += 1;
+    if (_onCollisionEnter()) {
+      this.xPos -= 1;
+    }
+    notifyListeners();
+  }
+
+  rotateLeft() {
+    this.angle = (this.angle + (1 * 90)) % 360;
+    if (_onCollisionEnter()) {
+      this.angle = (this.angle + (3 * 90)) % 360;
     }
     notifyListeners();
   }
 
   rotateRight() {
-    this.angle += (3 * pi) / 2;
-    this.angle = this.angle % (2 * pi);
-    notifyListeners();
-  }
-
-  rotateLeft() {
-    this.angle += pi / 2;
-    this.angle = this.angle % (2 * pi);
+    this.angle = (this.angle + (3 * 90)) % 360;
+    if (_onCollisionEnter()) {
+      this.angle = (this.angle + (1 * 90)) % 360;
+    }
     notifyListeners();
   }
 
   // コリジョン情報更新
   _updateCollision() {
-    this.jMinoCollision[angle].asMap().forEach(
+    Mino.mino[indexMino][angle].asMap().forEach(
       (index, value) {
         this.nowCollision[index][0] = value[0] + this.xPos;
         this.nowCollision[index][1] = value[1] + this.yPos;
@@ -120,17 +103,45 @@ class MainModel extends ChangeNotifier {
     );
   }
 
-  // 場外判定
-  bool _isOutOfRange() {
-    bool _isOutOfRange = false;
+  // 衝突判定
+  bool _onCollisionEnter() {
+    bool _onCollisionEnter = false;
     _updateCollision();
     nowCollision.forEach(
       (element) {
         if (element[0] < -5 || 4 < element[0] || 19 < element[1]) {
-          _isOutOfRange = true;
+          _onCollisionEnter = true;
+        }
+        for (List<int> e in this.fixedMino) {
+          if (e[0] == element[0] && e[1] == element[1]) {
+            _onCollisionEnter = true;
+          }
         }
       },
     );
-    return _isOutOfRange;
+    return _onCollisionEnter;
+  }
+
+  // 消滅判定
+  _canDelete() {
+    List<int> _countCell = List.filled(20, 0);
+    _countCell.asMap().forEach(
+      (index, value) {
+        fixedMino.forEach((element) {
+          if (element[1] == index) {
+            value += 1;
+            print([index, value]);
+          }
+        });
+        if (value == 10) {
+          print('delete!');
+          print(fixedMino);
+          fixedMino.removeWhere((element) => element[1] == index);
+          fixedMino.where((element) => element[1] < index).forEach((element) {
+            element[1] += 1;
+          });
+        }
+      },
+    );
   }
 }
