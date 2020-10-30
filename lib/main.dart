@@ -114,10 +114,7 @@ class MyApp extends StatelessWidget {
                         children: [
                           CustomPaint(
                             painter: RenderMino(
-                              xPos: model.xPos,
-                              yPos: model.yPos,
-                              angle: model.angle,
-                              indexMino: model.indexMino,
+                              currentMino: model.currentMino,
                               fixedMino: model.fixedMino,
                             ),
                           ),
