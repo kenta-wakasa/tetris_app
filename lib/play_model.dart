@@ -2,30 +2,44 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'mino.dart';
 
-class MainModel extends ChangeNotifier {
-  Timer _timer;
+class PlayModel extends ChangeNotifier {
+  Timer _countDownTimer;
+  Timer _startTimer;
+  int count = 3;
   int yPos = 0;
   int xPos = 0;
   int angle = 0;
   int index = 0;
   int indexMino = 0;
+  bool gameOver = false;
   List<int> orderMino = [0, 1, 2, 3, 4, 5, 6];
-  List<List<int>> currentMino = [
-    [0, 0],
-    [0, 0],
-    [0, 0],
-    [0, 0]
-  ];
+  List<List<int>> currentMino = [];
   List<List<int>> fixedMino = [];
 
-  startTimer() {
+  countDown() {
+    gameOver = false;
+    count = 3;
+    _countDownTimer = Timer.periodic(
+      Duration(seconds: 1),
+      (Timer t) {
+        count -= 1;
+        if (count == -1) {
+          _countDownTimer.cancel();
+          startPlay();
+        }
+        notifyListeners();
+      },
+    );
+  }
+
+  startPlay() {
+    gameOver = false;
     _generateMino();
-    _timer = Timer.periodic(
+    _startTimer = Timer.periodic(
       Duration(milliseconds: 200),
       (Timer t) {
         yPos += 1;
         if (_onCollisionEnter()) {
-          //ToDo: ミノを固定する
           yPos -= 1;
           _updateMino();
           for (List<int> e in currentMino) {
@@ -35,6 +49,10 @@ class MainModel extends ChangeNotifier {
           _generateMino();
         }
         _updateMino();
+        if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
+          _startTimer.cancel();
+          gameOver = true;
+        }
         notifyListeners();
       },
     );
@@ -58,7 +76,8 @@ class MainModel extends ChangeNotifier {
     xPos = 0;
     angle = 0;
     fixedMino.clear();
-    _updateMino();
+    currentMino.clear();
+    _startTimer.cancel();
     notifyListeners();
   }
 
@@ -100,6 +119,14 @@ class MainModel extends ChangeNotifier {
 
   // コリジョン情報更新
   _updateMino() {
+    if (currentMino.isEmpty) {
+      currentMino = [
+        [0, 0],
+        [0, 0],
+        [0, 0],
+        [0, 0],
+      ];
+    }
     Mino.mino[indexMino][angle].asMap().forEach(
       (index, value) {
         currentMino[index][0] = value[0] + xPos;

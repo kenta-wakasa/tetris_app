@@ -14,18 +14,35 @@ class RenderMino extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
-    paint.color = Colors.blue;
 
-    currentMino.forEach(
+    paint.color = Colors.brown;
+    fixedMino.forEach(
       (element) {
         canvas.drawRect(
             Rect.fromLTWH(element[0] * basis, element[1] * basis, basis, basis),
             paint);
       },
     );
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 2.0;
+    canvas.drawRect(
+        Rect.fromLTWH(-5.0 * basis, 0, 10 * basis, 20 * basis), paint);
+    paint.strokeWidth = .5;
 
-    paint.color = Colors.red;
-    fixedMino.forEach(
+    // draw vertical grid
+    for (int index = -4; index < 5; index++) {
+      canvas.drawLine(
+          Offset(index * basis, 0), Offset(index * basis, 20 * basis), paint);
+    }
+    // draw horizontal grid
+    for (int index = 1; index < 20; index++) {
+      canvas.drawLine(Offset(-5 * basis, index * basis),
+          Offset(5 * basis, index * basis), paint);
+    }
+
+    paint.style = PaintingStyle.fill;
+    paint.color = Colors.redAccent;
+    currentMino.forEach(
       (element) {
         canvas.drawRect(
             Rect.fromLTWH(element[0] * basis, element[1] * basis, basis, basis),
