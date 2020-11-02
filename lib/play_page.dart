@@ -30,6 +30,7 @@ class PlayPage extends StatelessWidget {
                       child: CustomPaint(
                         painter: RenderMino(
                           currentMino: model.currentMino,
+                          futureMino: model.futureMino,
                           fixedMino: model.fixedMino,
                         ),
                       ),
