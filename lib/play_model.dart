@@ -37,20 +37,21 @@ class PlayModel extends ChangeNotifier {
   startPlay() {
     _generateMino();
     _mainTimer = Timer.periodic(
-      Duration(milliseconds: 200),
+      Duration(milliseconds: 1000),
       (Timer t) {
         yPos += 1;
-        _updateMino();
+        _updateCurrentMino();
         if (_onCollisionEnter(currentMino)) {
           yPos -= 1;
-          _updateMino();
+          _updateCurrentMino();
           for (List<int> e in currentMino) {
             fixedMino.add([e[0], e[1]]);
           }
           _deleteMino();
           _generateMino();
         }
-        _updateMino();
+        _updateCurrentMino();
+        // game over 判定
         if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
           _mainTimer.cancel();
           gameOver = true;
@@ -58,19 +59,6 @@ class PlayModel extends ChangeNotifier {
         notifyListeners();
       },
     );
-  }
-
-  _generateMino() {
-    if ((index % 7) == 0) {
-      orderMino.shuffle();
-    }
-    yPos = 0;
-    xPos = 0;
-    angle = 0;
-    indexMino = orderMino[index % 7];
-    index += 1;
-    _updateMino();
-    notifyListeners();
   }
 
   reset() {
@@ -86,46 +74,69 @@ class PlayModel extends ChangeNotifier {
 
   moveLeft() {
     xPos -= 1;
-    _updateMino();
+    _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
       xPos += 1;
-      _updateMino();
+      _updateCurrentMino();
     }
     notifyListeners();
   }
 
   moveRight() {
     xPos += 1;
-    _updateMino();
+    _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
       xPos -= 1;
-      _updateMino();
+      _updateCurrentMino();
     }
     notifyListeners();
   }
 
   rotateLeft() {
     angle = (angle + (1 * 90)) % 360;
-    _updateMino();
+    _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
       angle = (angle + (3 * 90)) % 360;
-      _updateMino();
+      _updateCurrentMino();
     }
     notifyListeners();
   }
 
   rotateRight() {
     angle = (angle + (3 * 90)) % 360;
-    _updateMino();
+    _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
       angle = (angle + (1 * 90)) % 360;
-      _updateMino();
+      _updateCurrentMino();
     }
     notifyListeners();
   }
 
+  hardDrop() {
+    for (List<int> e in futureMino) {
+      fixedMino.add([e[0], e[1]]);
+    }
+    _generateMino();
+    _updateCurrentMino();
+    _deleteMino();
+    notifyListeners();
+  }
+
+  _generateMino() {
+    if ((index % 7) == 0) {
+      orderMino.shuffle();
+    }
+    yPos = 0;
+    xPos = 0;
+    angle = 0;
+    indexMino = orderMino[index % 7];
+    index += 1;
+    _updateCurrentMino();
+    notifyListeners();
+  }
+
   // コリジョン情報更新
-  _updateMino() {
+  _updateCurrentMino() {
     if (currentMino.isEmpty) {
       currentMino = [
         [0, 0],
@@ -155,7 +166,9 @@ class PlayModel extends ChangeNotifier {
         [0, 0],
       ];
     }
-    for (yPosFuture = yPos; _enter == false; yPosFuture++) {
+    yPosFuture = yPos;
+    while (_enter == false) {
+      yPosFuture++;
       Mino.mino[indexMino][angle].asMap().forEach(
         (index, value) {
           futureMino[index][0] = value[0] + xPos;

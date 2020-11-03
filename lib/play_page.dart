@@ -37,78 +37,91 @@ class PlayPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox.expand(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            MaterialButton(
-                              minWidth: 12,
-                              onPressed: () {
-                                model.rotateLeft();
-                              },
-                              child: Icon(Icons.sync),
-                              shape: CircleBorder(),
-                              color: Colors.white,
-                            ),
-                            Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(pi),
-                              child: MaterialButton(
-                                minWidth: 12,
-                                onPressed: () {
-                                  model.rotateRight();
-                                },
-                                shape: CircleBorder(),
-                                child: Icon(Icons.sync),
-                                color: Colors.white,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  MaterialButton(
+                                    minWidth: 12,
+                                    onPressed: () {
+                                      model.moveLeft();
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_left,
+                                      color: Colors.white,
+                                    ),
+                                    shape: CircleBorder(),
+                                    color: Colors.redAccent,
+                                  ),
+                                  MaterialButton(
+                                    minWidth: 12,
+                                    onPressed: () {
+                                      model.moveRight();
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_right,
+                                      color: Colors.white,
+                                    ),
+                                    shape: CircleBorder(),
+                                    color: Colors.redAccent,
+                                  ),
+                                ],
                               ),
-                            ),
-                            SizedBox(
-                              width: 16,
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 4,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              child: MaterialButton(
+                              MaterialButton(
                                 minWidth: 12,
                                 onPressed: () {
-                                  model.moveLeft();
+                                  model.hardDrop();
                                 },
                                 child: Icon(
-                                  Icons.arrow_left,
+                                  Icons.arrow_drop_down,
                                   color: Colors.white,
                                 ),
                                 shape: CircleBorder(),
                                 color: Colors.redAccent,
                               ),
-                            ),
-                            MaterialButton(
-                              minWidth: 12,
-                              onPressed: () {
-                                model.moveRight();
-                              },
-                              child: Icon(
-                                Icons.arrow_right,
+                              SizedBox(
+                                height: 12,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              MaterialButton(
+                                minWidth: 12,
+                                onPressed: () {
+                                  model.rotateLeft();
+                                },
+                                child: Icon(Icons.sync),
+                                shape: CircleBorder(),
                                 color: Colors.white,
                               ),
-                              shape: CircleBorder(),
-                              color: Colors.redAccent,
-                            ),
-                            SizedBox(
-                              width: 16,
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 16,
+                              Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(pi),
+                                child: MaterialButton(
+                                  minWidth: 12,
+                                  onPressed: () {
+                                    model.rotateRight();
+                                  },
+                                  shape: CircleBorder(),
+                                  child: Icon(Icons.sync),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

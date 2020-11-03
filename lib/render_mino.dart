@@ -18,6 +18,7 @@ class RenderMino extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
 
+    // draw fixedMino
     paint.color = Colors.brown;
     fixedMino.forEach(
       (element) {
@@ -43,6 +44,7 @@ class RenderMino extends CustomPainter {
           Offset(5 * basis, index * basis), paint);
     }
 
+    // draw currentMino
     paint.style = PaintingStyle.fill;
     paint.color = Colors.redAccent;
     currentMino.forEach(
@@ -53,6 +55,7 @@ class RenderMino extends CustomPainter {
       },
     );
 
+    // draw futureMino
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 3;
     futureMino.forEach(
