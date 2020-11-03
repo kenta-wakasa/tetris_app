@@ -50,9 +50,8 @@ class PlayModel extends ChangeNotifier {
           _gameOver();
           _deleteMino();
           _generateMino();
+          _updateCurrentMino();
         }
-        _updateCurrentMino();
-
         notifyListeners();
       },
     );
@@ -85,6 +84,23 @@ class PlayModel extends ChangeNotifier {
     _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
       xPos -= 1;
+      _updateCurrentMino();
+    }
+    notifyListeners();
+  }
+
+  moveDown() {
+    yPos += 1;
+    _updateCurrentMino();
+    if (_onCollisionEnter(currentMino)) {
+      yPos -= 1;
+      _updateCurrentMino();
+      for (List<int> e in currentMino) {
+        fixedMino.add([e[0], e[1]]);
+      }
+      _gameOver();
+      _deleteMino();
+      _generateMino();
       _updateCurrentMino();
     }
     notifyListeners();

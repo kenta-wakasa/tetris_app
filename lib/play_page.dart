@@ -11,8 +11,10 @@ class PlayPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
     final _centerPos = _size.width / 2;
-    double deltaLeft = 0;
-    double deltaRight = 0;
+    double _deltaLeft = 0;
+    double _deltaRight = 0;
+    double _deltaDown = 0;
+    bool _hardDrop = false;
     return ChangeNotifierProvider<PlayModel>(
       create: (_) => PlayModel()..countDown(),
       child: Consumer<PlayModel>(
@@ -29,6 +31,7 @@ class PlayPage extends StatelessWidget {
                 children: [
                   // タップなどの検知
                   GestureDetector(
+                    // 回転処理
                     onTapUp: (details) {
                       if (details.globalPosition.dx < _centerPos) {
                         model.rotateLeft();
@@ -36,23 +39,40 @@ class PlayPage extends StatelessWidget {
                         model.rotateRight();
                       }
                     },
-                    onHorizontalDragDown: (_) {
-                      deltaRight = 0;
-                      deltaLeft = 0;
+                    // タップ時に初期化
+                    onPanDown: (_) {
+                      _hardDrop = false;
+                      _deltaRight = 0;
+                      _deltaLeft = 0;
+                      _deltaDown = 0;
                     },
-                    onHorizontalDragUpdate: (details) {
+                    onPanUpdate: (details) {
+                      // 移動処理
                       if (0 < details.delta.dx) {
-                        deltaRight += details.delta.dx;
-                        if (20 < deltaRight) {
+                        _deltaRight += details.delta.dx;
+                        if (20 < _deltaRight) {
                           model.moveRight();
-                          deltaRight = 0;
+                          _deltaRight = 0;
                         }
                       } else {
-                        deltaLeft += details.delta.dx.abs();
-                        if (20 < deltaLeft) {
+                        _deltaLeft += details.delta.dx.abs();
+                        if (20 < _deltaLeft) {
                           model.moveLeft();
-                          deltaLeft = 0;
+                          _deltaLeft = 0;
                         }
+                      }
+                      if (0 < details.delta.dy) {
+                        _deltaDown += details.delta.dy;
+                        if (20 < _deltaDown && !_hardDrop) {
+                          model.moveDown();
+                          _deltaDown = 0;
+                        }
+                      }
+                      // hard drop 処理
+                      if (20 < details.delta.dy && !_hardDrop) {
+                        _hardDrop = true;
+                        _deltaDown = 0;
+                        model.hardDrop();
                       }
                     },
                     child: Container(
