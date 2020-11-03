@@ -9,6 +9,10 @@ import 'render_mino.dart';
 class PlayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final _size = MediaQuery.of(context).size;
+    final _centerPos = _size.width / 2;
+    double deltaLeft = 0;
+    double deltaRight = 0;
     return ChangeNotifierProvider<PlayModel>(
       create: (_) => PlayModel()..countDown(),
       child: Consumer<PlayModel>(
@@ -23,6 +27,38 @@ class PlayPage extends StatelessWidget {
               ),
               body: Stack(
                 children: [
+                  // タップなどの検知
+                  GestureDetector(
+                    onTapUp: (details) {
+                      if (details.globalPosition.dx < _centerPos) {
+                        model.rotateLeft();
+                      } else {
+                        model.rotateRight();
+                      }
+                    },
+                    onHorizontalDragDown: (_) {
+                      deltaRight = 0;
+                      deltaLeft = 0;
+                    },
+                    onHorizontalDragUpdate: (details) {
+                      if (0 < details.delta.dx) {
+                        deltaRight += details.delta.dx;
+                        if (20 < deltaRight) {
+                          model.moveRight();
+                          deltaRight = 0;
+                        }
+                      } else {
+                        deltaLeft += details.delta.dx.abs();
+                        if (20 < deltaLeft) {
+                          model.moveLeft();
+                          deltaLeft = 0;
+                        }
+                      }
+                    },
+                    child: Container(
+                      color: Colors.white.withOpacity(0),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 64),
                     child: Align(
@@ -195,13 +231,18 @@ class PlayPage extends StatelessWidget {
                         )
                       : Container(),
                   model.count > -1
-                      ? Center(
-                          child: Text(
-                            model.count != 0 ? model.count.toString() : 'GO!!',
-                            style: TextStyle(
-                              fontSize: 100,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.brown[900],
+                      ? Container(
+                          color: Colors.brown.withOpacity(0.2),
+                          child: Center(
+                            child: Text(
+                              model.count != 0
+                                  ? model.count.toString()
+                                  : 'GO!!',
+                              style: TextStyle(
+                                fontSize: 100,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.brown[900],
+                              ),
                             ),
                           ),
                         )

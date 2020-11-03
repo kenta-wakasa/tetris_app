@@ -47,15 +47,12 @@ class PlayModel extends ChangeNotifier {
           for (List<int> e in currentMino) {
             fixedMino.add([e[0], e[1]]);
           }
+          _gameOver();
           _deleteMino();
           _generateMino();
         }
         _updateCurrentMino();
-        // game over 判定
-        if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
-          _mainTimer.cancel();
-          gameOver = true;
-        }
+
         notifyListeners();
       },
     );
@@ -64,6 +61,7 @@ class PlayModel extends ChangeNotifier {
   reset() {
     yPos = 0;
     xPos = 0;
+    index = 0;
     angle = 0;
     fixedMino.clear();
     currentMino.clear();
@@ -119,7 +117,16 @@ class PlayModel extends ChangeNotifier {
     _generateMino();
     _updateCurrentMino();
     _deleteMino();
+    _gameOver();
     notifyListeners();
+  }
+
+  // game over 判定
+  _gameOver() {
+    if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
+      _mainTimer.cancel();
+      gameOver = true;
+    }
   }
 
   _generateMino() {
