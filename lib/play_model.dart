@@ -10,10 +10,15 @@ class PlayModel extends ChangeNotifier {
   int yPos = 0;
   int yPosFuture = 0;
   int angle = 0;
-  int index = 0;
+  int index = -1;
   int indexMino = 0;
+  List<int> nextMinoList = [-1, -1, -1, -1];
+  int indexHold = -1;
+  bool usedHold = false;
   bool gameOver = false;
-  List<int> orderMino = [0, 1, 2, 3, 4, 5, 6];
+  List<int> orderMino = List(14);
+  List<int> orderMinoFront = [0, 1, 2, 3, 4, 5, 6];
+  List<int> orderMinoBack = [0, 1, 2, 3, 4, 5, 6];
   List<List<int>> currentMino = [];
   List<List<int>> futureMino = [];
   List<List<int>> fixedMino = [];
@@ -36,32 +41,18 @@ class PlayModel extends ChangeNotifier {
 
   startPlay() {
     _generateMino();
-    _mainTimer = Timer.periodic(
-      Duration(milliseconds: 1000),
-      (Timer t) {
-        yPos += 1;
-        _updateCurrentMino();
-        if (_onCollisionEnter(currentMino)) {
-          yPos -= 1;
-          _updateCurrentMino();
-          for (List<int> e in currentMino) {
-            fixedMino.add([e[0], e[1]]);
-          }
-          _gameOver();
-          _deleteMino();
-          _generateMino();
-          _updateCurrentMino();
-        }
-        notifyListeners();
-      },
-    );
+    _mainTimer = Timer.periodic(Duration(milliseconds: 1000), (Timer t) {
+      moveDown();
+    });
   }
 
   reset() {
     yPos = 0;
     xPos = 0;
-    index = 0;
+    index = -1;
+    indexHold = -1;
     angle = 0;
+    nextMinoList.clear();
     fixedMino.clear();
     currentMino.clear();
     futureMino.clear();
@@ -137,6 +128,27 @@ class PlayModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  holdMino() {
+    if (usedHold) {
+    } else {
+      int _indexMino;
+      _indexMino = indexMino;
+      if (-1 < indexHold) {
+        indexMino = indexHold;
+        indexHold = _indexMino;
+        yPos = 0;
+        xPos = 0;
+        angle = 0;
+        _updateCurrentMino();
+        notifyListeners();
+      } else {
+        indexHold = _indexMino;
+        _generateMino();
+      }
+      usedHold = true;
+    }
+  }
+
   // game over 判定
   _gameOver() {
     if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
@@ -146,14 +158,32 @@ class PlayModel extends ChangeNotifier {
   }
 
   _generateMino() {
-    if ((index % 7) == 0) {
-      orderMino.shuffle();
+    if (index == -1) {
+      orderMinoFront.shuffle();
+      orderMino = [...orderMinoFront, ...orderMinoBack];
+      index++;
+    }
+    if ((index % 14) == 0) {
+      print('back');
+      orderMinoBack.shuffle();
+      orderMino = [...orderMinoFront, ...orderMinoBack];
+    } else if ((index % 14) == 6) {
+      print('front');
+      orderMinoFront.shuffle();
+      orderMino = [...orderMinoFront, ...orderMinoBack];
     }
     yPos = 0;
     xPos = 0;
     angle = 0;
-    indexMino = orderMino[index % 7];
+    indexMino = orderMino[index % 14];
+    nextMinoList = [
+      orderMino[(index + 1) % 14],
+      orderMino[(index + 2) % 14],
+      orderMino[(index + 3) % 14],
+      orderMino[(index + 4) % 14],
+    ];
     index += 1;
+    usedHold = false;
     _updateCurrentMino();
     notifyListeners();
   }
