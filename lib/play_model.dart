@@ -97,24 +97,170 @@ class PlayModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  rotateLeft() {
-    angle = (angle + (1 * 90)) % 360;
+  bool moveXY(int dx, int dy) {
+    xPos += dx;
+    yPos += dy;
     _updateCurrentMino();
     if (_onCollisionEnter(currentMino)) {
-      angle = (angle + (3 * 90)) % 360;
+      xPos -= dx;
+      yPos -= dy;
       _updateCurrentMino();
+      notifyListeners();
+      return false;
+    } else {
+      notifyListeners();
+      return true;
     }
-    notifyListeners();
+  }
+
+  rotateLeft() {
+    final _temporaryAngle = angle;
+    angle = (angle + (1 * 90)) % 360;
+    _updateCurrentMino();
+    // 回転したとき他の障害部に当たった場合
+    // SRS(スーパーローテーションシステム)に従いミノを移動させる
+    // 参考: https://tetrisch.github.io/main/srs.html
+    if (_onCollisionEnter(currentMino)) {
+      // iMinoかどうかで分岐
+      if (indexMino == 0) {
+        // angleで分岐
+        switch (angle) {
+          case 0:
+            if (moveXY(2, 0)) return 0;
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(2, -1)) return 0;
+            if (moveXY(-1, 2)) return 0;
+            break;
+          case 90:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(2, 0)) return 0;
+            if (moveXY(-1, 1)) return 0;
+            if (moveXY(2, 1)) return 0;
+            break;
+          case 180:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(-2, 0)) return 0;
+            if (moveXY(-2, 1)) return 0;
+            if (moveXY(1, -2)) return 0;
+            break;
+          case 270:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(-2, 0)) return 0;
+            if (moveXY(1, 2)) return 0;
+            if (moveXY(-2, -1)) return 0;
+            break;
+        }
+      } else {
+        // angleで分岐
+        switch (angle) {
+          case 0:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(1, 1)) return 0;
+            if (moveXY(0, -1)) return 0;
+            if (moveXY(1, -1)) return 0;
+            break;
+          case 90:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(1, -1)) return 0;
+            if (moveXY(0, 1)) return 0;
+            if (moveXY(1, 1)) return 0;
+            break;
+          case 180:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(-1, 1)) return 0;
+            if (moveXY(0, -1)) return 0;
+            if (moveXY(-1, -1)) return 0;
+            break;
+          case 270:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(-1, -1)) return 0;
+            if (moveXY(0, 1)) return 0;
+            if (moveXY(-1, 1)) return 0;
+            break;
+        }
+      }
+      // どこにも動かせなかった場合角度を戻す
+      angle = _temporaryAngle;
+      _updateCurrentMino();
+      notifyListeners();
+    } else {
+      notifyListeners();
+    }
   }
 
   rotateRight() {
+    final _temporaryAngle = angle;
     angle = (angle + (3 * 90)) % 360;
     _updateCurrentMino();
+    // 回転したとき他の障害部に当たった場合
+    // SRS(スーパーローテーションシステム)に従いミノを移動させる
+    // 参考: https://tetrisch.github.io/main/srs.html
     if (_onCollisionEnter(currentMino)) {
-      angle = (angle + (1 * 90)) % 360;
+      // iMinoかどうかで分岐
+      if (indexMino == 0) {
+        // angleで分岐
+        switch (angle) {
+          case 0:
+            if (moveXY(-2, 0)) return 0;
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(2, 1)) return 0;
+            if (moveXY(-2, -1)) return 0;
+            break;
+          case 90:
+            if (moveXY(2, 0)) return 0;
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(2, -1)) return 0;
+            if (moveXY(-1, 2)) return 0;
+            break;
+          case 180:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(2, 0)) return 0;
+            if (moveXY(-1, 2)) return 0;
+            if (moveXY(2, -1)) return 0;
+            break;
+          case 270:
+            if (moveXY(2, 0)) return 0;
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(2, -1)) return 0;
+            if (moveXY(-1, 2)) return 0;
+            break;
+        }
+      } else {
+        // angleで分岐
+        switch (angle) {
+          case 0:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(-1, 1)) return 0;
+            if (moveXY(0, -1)) return 0;
+            if (moveXY(-1, -1)) return 0;
+            break;
+          case 90:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(1, -1)) return 0;
+            if (moveXY(0, 1)) return 0;
+            if (moveXY(1, 1)) return 0;
+            break;
+          case 180:
+            if (moveXY(1, 0)) return 0;
+            if (moveXY(1, 1)) return 0;
+            if (moveXY(0, -1)) return 0;
+            if (moveXY(1, 1)) return 0;
+            break;
+          case 270:
+            if (moveXY(-1, 0)) return 0;
+            if (moveXY(-1, -1)) return 0;
+            if (moveXY(0, 1)) return 0;
+            if (moveXY(-1, 1)) return 0;
+            break;
+        }
+      }
+      // どこにも動かせなかった場合角度を戻す
+      angle = _temporaryAngle;
       _updateCurrentMino();
+      notifyListeners();
+    } else {
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   hardDrop() {
@@ -158,17 +304,19 @@ class PlayModel extends ChangeNotifier {
   }
 
   _generateMino() {
+    // 初期化
     if (index == -1) {
       orderMinoFront.shuffle();
       orderMino = [...orderMinoFront, ...orderMinoBack];
       index++;
     }
+    // 0番目のときに 7~13番目をシャッフル
     if ((index % 14) == 0) {
-      print('back');
       orderMinoBack.shuffle();
       orderMino = [...orderMinoFront, ...orderMinoBack];
-    } else if ((index % 14) == 6) {
-      print('front');
+    }
+    // 7番目のときに 0~6番目をシャッフル
+    if ((index % 14) == 7) {
       orderMinoFront.shuffle();
       orderMino = [...orderMinoFront, ...orderMinoBack];
     }
