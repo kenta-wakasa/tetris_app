@@ -68,7 +68,10 @@ class PlayPage extends StatelessWidget {
                     if (0 < details.delta.dy) {
                       _deltaDown += details.delta.dy;
                       if (_inputSensitivity < _deltaDown && !_hardDrop) {
-                        model.moveDown();
+                        if (model.wait) {
+                        } else {
+                          model.moveDown();
+                        }
                         _deltaDown = 0;
                       }
                     }

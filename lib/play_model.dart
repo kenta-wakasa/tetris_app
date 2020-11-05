@@ -5,6 +5,7 @@ import 'mino.dart';
 class PlayModel extends ChangeNotifier {
   Timer _countDownTimer;
   Timer _mainTimer;
+  Timer _waitTimer;
   int count = 3;
   int xPos = 0;
   int yPos = 0;
@@ -12,10 +13,12 @@ class PlayModel extends ChangeNotifier {
   int angle = 0;
   int index = -1;
   int indexMino = 0;
+  int groundCount = 0;
   List<int> nextMinoList = [-1, -1, -1, -1];
   int indexHold = -1;
   bool usedHold = false;
   bool gameOver = false;
+  bool wait = false;
   List<int> orderMino = List(14);
   List<int> orderMinoFront = [0, 1, 2, 3, 4, 5, 6];
   List<int> orderMinoBack = [0, 1, 2, 3, 4, 5, 6];
@@ -31,19 +34,43 @@ class PlayModel extends ChangeNotifier {
       (Timer t) {
         count -= 1;
         if (count == -1) {
-          _countDownTimer.cancel();
-          startPlay();
+          _countDownTimer?.cancel();
+          _generateMino();
+          startMain();
         }
         notifyListeners();
       },
     );
   }
 
-  startPlay() {
-    _generateMino();
-    _mainTimer = Timer.periodic(Duration(milliseconds: 1000), (Timer t) {
-      moveDown();
-    });
+  startMain() {
+    if (_mainTimer == null || _mainTimer?.isActive == false) {
+      _mainTimer = Timer.periodic(
+        Duration(milliseconds: 1000),
+        (Timer t) {
+          if (!_verifyGround()) moveDown();
+        },
+      );
+    }
+  }
+
+  startWaitTime() {
+    _waitTimer = Timer.periodic(
+      Duration(milliseconds: 500),
+      (Timer t) {
+        for (List<int> e in currentMino) {
+          fixedMino.add([e[0], e[1]]);
+        }
+        _deleteMino();
+        wait = false;
+        _waitTimer?.cancel();
+        _generateMino();
+        if (_gameOver()) {
+        } else {
+          startMain();
+        }
+      },
+    );
   }
 
   reset() {
@@ -52,11 +79,16 @@ class PlayModel extends ChangeNotifier {
     index = -1;
     indexHold = -1;
     angle = 0;
+    groundCount = 0;
     nextMinoList.clear();
     fixedMino.clear();
     currentMino.clear();
     futureMino.clear();
-    _mainTimer.cancel();
+    _mainTimer?.cancel();
+    _waitTimer?.cancel();
+    wait = false;
+    usedHold = false;
+    gameOver = false;
     notifyListeners();
   }
 
@@ -67,6 +99,7 @@ class PlayModel extends ChangeNotifier {
       xPos += 1;
       _updateCurrentMino();
     }
+    _verifyGround();
     notifyListeners();
   }
 
@@ -77,24 +110,52 @@ class PlayModel extends ChangeNotifier {
       xPos -= 1;
       _updateCurrentMino();
     }
+    _verifyGround();
     notifyListeners();
   }
 
   moveDown() {
+    // まず設置しているかを判定する。
     yPos += 1;
     _updateCurrentMino();
-    if (_onCollisionEnter(currentMino)) {
-      yPos -= 1;
-      _updateCurrentMino();
-      for (List<int> e in currentMino) {
-        fixedMino.add([e[0], e[1]]);
-      }
-      _gameOver();
-      _deleteMino();
-      _generateMino();
-      _updateCurrentMino();
-    }
+    _verifyGround();
     notifyListeners();
+  }
+
+  // 接地していたらwaitTimerを起動しtrueを返す
+  bool _verifyGround() {
+    bool _ground = false;
+    _waitTimer?.cancel();
+    yPos += 1;
+    _updateCurrentMino();
+    // 設置していたら0.5秒間の待ち時間を起動する
+    if (_onCollisionEnter(currentMino)) {
+      groundCount += 1;
+      if (groundCount < 16) {
+        _mainTimer?.cancel();
+        wait = true;
+        startWaitTime();
+      } else {
+        yPos -= 1;
+        _updateCurrentMino();
+        for (List<int> e in currentMino) {
+          fixedMino.add([e[0], e[1]]);
+        }
+        _deleteMino();
+        yPos += 1;
+        wait = false;
+        _waitTimer?.cancel();
+        _generateMino();
+        _gameOver();
+        return true;
+      }
+      _ground = true;
+    } else {
+      startMain();
+    }
+    yPos -= 1;
+    _updateCurrentMino();
+    return _ground;
   }
 
   bool moveXY(int dx, int dy) {
@@ -108,6 +169,7 @@ class PlayModel extends ChangeNotifier {
       notifyListeners();
       return false;
     } else {
+      _verifyGround();
       notifyListeners();
       return true;
     }
@@ -182,8 +244,10 @@ class PlayModel extends ChangeNotifier {
       // どこにも動かせなかった場合角度を戻す
       angle = _temporaryAngle;
       _updateCurrentMino();
+      _verifyGround();
       notifyListeners();
     } else {
+      _verifyGround();
       notifyListeners();
     }
   }
@@ -257,8 +321,10 @@ class PlayModel extends ChangeNotifier {
       // どこにも動かせなかった場合角度を戻す
       angle = _temporaryAngle;
       _updateCurrentMino();
+      _verifyGround();
       notifyListeners();
     } else {
+      _verifyGround();
       notifyListeners();
     }
   }
@@ -268,9 +334,14 @@ class PlayModel extends ChangeNotifier {
       fixedMino.add([e[0], e[1]]);
     }
     _generateMino();
-    _updateCurrentMino();
     _deleteMino();
+    _updateCurrentMino();
     _gameOver();
+    if (wait) {
+      _waitTimer?.cancel();
+      wait = false;
+      startMain();
+    }
     notifyListeners();
   }
 
@@ -296,11 +367,13 @@ class PlayModel extends ChangeNotifier {
   }
 
   // game over 判定
-  _gameOver() {
+  bool _gameOver() {
     if (fixedMino.where((element) => element[1] == -1).isNotEmpty) {
-      _mainTimer.cancel();
+      _mainTimer?.cancel();
+      _waitTimer?.cancel();
       gameOver = true;
     }
+    return gameOver;
   }
 
   _generateMino() {
@@ -332,6 +405,7 @@ class PlayModel extends ChangeNotifier {
     ];
     index += 1;
     usedHold = false;
+    groundCount = 0;
     _updateCurrentMino();
     notifyListeners();
   }
@@ -352,7 +426,7 @@ class PlayModel extends ChangeNotifier {
         currentMino[index][1] = value[1] + yPos;
       },
     );
-    // 必ずupdateの後に呼ぶ
+
     _predictDropPos();
   }
 
