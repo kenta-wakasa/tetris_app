@@ -151,6 +151,7 @@ class PlayModel extends ChangeNotifier {
       }
       _ground = true;
     } else {
+      wait = false;
       startMain();
     }
     yPos -= 1;
@@ -196,7 +197,7 @@ class PlayModel extends ChangeNotifier {
           case 90:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(2, 0)) return 0;
-            if (moveXY(-1, 1)) return 0;
+            if (moveXY(-1, -2)) return 0;
             if (moveXY(2, 1)) return 0;
             break;
           case 180:
@@ -218,26 +219,26 @@ class PlayModel extends ChangeNotifier {
           case 0:
             if (moveXY(1, 0)) return 0;
             if (moveXY(1, 1)) return 0;
-            if (moveXY(0, -1)) return 0;
-            if (moveXY(1, -1)) return 0;
+            if (moveXY(0, -2)) return 0;
+            if (moveXY(1, -2)) return 0;
             break;
           case 90:
             if (moveXY(1, 0)) return 0;
             if (moveXY(1, -1)) return 0;
-            if (moveXY(0, 1)) return 0;
-            if (moveXY(1, 1)) return 0;
+            if (moveXY(0, 2)) return 0;
+            if (moveXY(1, 2)) return 0;
             break;
           case 180:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(-1, 1)) return 0;
-            if (moveXY(0, -1)) return 0;
-            if (moveXY(-1, -1)) return 0;
+            if (moveXY(0, -2)) return 0;
+            if (moveXY(-1, -2)) return 0;
             break;
           case 270:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(-1, -1)) return 0;
-            if (moveXY(0, 1)) return 0;
-            if (moveXY(-1, 1)) return 0;
+            if (moveXY(0, 2)) return 0;
+            if (moveXY(-1, 2)) return 0;
             break;
         }
       }
@@ -267,7 +268,7 @@ class PlayModel extends ChangeNotifier {
           case 0:
             if (moveXY(-2, 0)) return 0;
             if (moveXY(1, 0)) return 0;
-            if (moveXY(2, 1)) return 0;
+            if (moveXY(1, 2)) return 0;
             if (moveXY(-2, -1)) return 0;
             break;
           case 90:
@@ -279,14 +280,14 @@ class PlayModel extends ChangeNotifier {
           case 180:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(2, 0)) return 0;
-            if (moveXY(-1, 2)) return 0;
+            if (moveXY(-1, -2)) return 0;
             if (moveXY(2, -1)) return 0;
             break;
           case 270:
             if (moveXY(2, 0)) return 0;
             if (moveXY(-1, 0)) return 0;
-            if (moveXY(2, -1)) return 0;
-            if (moveXY(-1, 2)) return 0;
+            if (moveXY(2, 1)) return 0;
+            if (moveXY(1, -2)) return 0;
             break;
         }
       } else {
@@ -295,26 +296,26 @@ class PlayModel extends ChangeNotifier {
           case 0:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(-1, 1)) return 0;
-            if (moveXY(0, -1)) return 0;
-            if (moveXY(-1, -1)) return 0;
+            if (moveXY(0, -2)) return 0;
+            if (moveXY(-1, -2)) return 0;
             break;
           case 90:
             if (moveXY(1, 0)) return 0;
             if (moveXY(1, -1)) return 0;
-            if (moveXY(0, 1)) return 0;
-            if (moveXY(1, 1)) return 0;
+            if (moveXY(0, 2)) return 0;
+            if (moveXY(1, 2)) return 0;
             break;
           case 180:
             if (moveXY(1, 0)) return 0;
             if (moveXY(1, 1)) return 0;
-            if (moveXY(0, -1)) return 0;
-            if (moveXY(1, 1)) return 0;
+            if (moveXY(0, -2)) return 0;
+            if (moveXY(1, -2)) return 0;
             break;
           case 270:
             if (moveXY(-1, 0)) return 0;
             if (moveXY(-1, -1)) return 0;
-            if (moveXY(0, 1)) return 0;
-            if (moveXY(-1, 1)) return 0;
+            if (moveXY(0, 2)) return 0;
+            if (moveXY(-1, 2)) return 0;
             break;
         }
       }
@@ -336,12 +337,10 @@ class PlayModel extends ChangeNotifier {
     _generateMino();
     _deleteMino();
     _updateCurrentMino();
+    wait = false;
+    _waitTimer?.cancel();
+    startMain();
     _gameOver();
-    if (wait) {
-      _waitTimer?.cancel();
-      wait = false;
-      startMain();
-    }
     notifyListeners();
   }
 
@@ -405,6 +404,7 @@ class PlayModel extends ChangeNotifier {
     ];
     index += 1;
     usedHold = false;
+    wait = false;
     groundCount = 0;
     _updateCurrentMino();
     notifyListeners();
