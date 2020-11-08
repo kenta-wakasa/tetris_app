@@ -17,14 +17,10 @@ class RenderNext extends CustomPainter {
     paint.color = Colors.brown;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 2.0;
-    canvas.drawRect(
-        Rect.fromLTWH(0, 0 * 6 * basis, 6 * basis, 6 * basis), paint);
-    canvas.drawRect(
-        Rect.fromLTWH(0, 1 * 6 * basis, 6 * basis, 6 * basis), paint);
-    canvas.drawRect(
-        Rect.fromLTWH(0, 2 * 6 * basis, 6 * basis, 6 * basis), paint);
-    canvas.drawRect(
-        Rect.fromLTWH(0, 3 * 6 * basis, 6 * basis, 6 * basis), paint);
+    for (int index = 0; index < 6; index++) {
+      canvas.drawRect(
+          Rect.fromLTWH(0, index * 6 * basis, 6 * basis, 6 * basis), paint);
+    }
 
     paint.style = PaintingStyle.fill;
 

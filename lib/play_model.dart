@@ -14,11 +14,11 @@ class PlayModel extends ChangeNotifier {
   int index = -1;
   int indexMino = 0;
   int groundCount = 0;
-  List<int> nextMinoList = [-1, -1, -1, -1];
   int indexHold = -1;
   bool usedHold = false;
   bool gameOver = false;
   bool wait = false;
+  List<int> nextMinoList = [-1, -1, -1, -1, -1, -1];
   List<int> orderMino = List(14);
   List<int> orderMinoFront = [0, 1, 2, 3, 4, 5, 6];
   List<int> orderMinoBack = [0, 1, 2, 3, 4, 5, 6];
@@ -27,14 +27,13 @@ class PlayModel extends ChangeNotifier {
   List<List<int>> fixedMino = [];
 
   countDown() {
-    gameOver = false;
     count = 3;
     _countDownTimer = Timer.periodic(
       Duration(seconds: 1),
       (Timer t) {
-        count -= 1;
+        count--;
         if (count == -1) {
-          _countDownTimer?.cancel();
+          _countDownTimer.cancel();
           _generateMino();
           startMain();
         }
@@ -401,6 +400,8 @@ class PlayModel extends ChangeNotifier {
       orderMino[(index + 2) % 14],
       orderMino[(index + 3) % 14],
       orderMino[(index + 4) % 14],
+      orderMino[(index + 5) % 14],
+      orderMino[(index + 6) % 14],
     ];
     index += 1;
     usedHold = false;
@@ -463,20 +464,17 @@ class PlayModel extends ChangeNotifier {
 
   // 衝突判定
   bool _onCollisionEnter(List<List<int>> mino) {
-    bool _onCollisionEnter = false;
-    mino.forEach(
-      (element) {
-        if (element[0] < -5 || 4 < element[0] || 19 < element[1]) {
-          _onCollisionEnter = true;
+    for (final eMino in mino) {
+      if (eMino[0] < -5 || 4 < eMino[0] || 19 < eMino[1]) {
+        return true;
+      }
+      for (final eFixed in fixedMino) {
+        if (eFixed[0] == eMino[0] && eFixed[1] == eMino[1]) {
+          return true;
         }
-        for (List<int> eFixedMino in fixedMino) {
-          if (eFixedMino[0] == element[0] && eFixedMino[1] == element[1]) {
-            _onCollisionEnter = true;
-          }
-        }
-      },
-    );
-    return _onCollisionEnter;
+      }
+    }
+    return false;
   }
 
   // 消滅判定
@@ -490,7 +488,7 @@ class PlayModel extends ChangeNotifier {
           fixedMino.removeWhere((element) => element[1] == index);
           // drop upper mino
           fixedMino.where((element) => element[1] < index).forEach((element) {
-            element[1] += 1;
+            element[1]++;
           });
         }
       },
