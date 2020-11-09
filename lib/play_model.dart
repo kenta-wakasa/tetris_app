@@ -35,14 +35,14 @@ class PlayModel extends ChangeNotifier {
         if (count == -1) {
           _countDownTimer.cancel();
           _generateMino();
-          startMain();
+          _startMain();
         }
         notifyListeners();
       },
     );
   }
 
-  startMain() {
+  _startMain() {
     if (_mainTimer == null || _mainTimer?.isActive == false) {
       _mainTimer = Timer.periodic(
         Duration(milliseconds: 1000),
@@ -66,7 +66,7 @@ class PlayModel extends ChangeNotifier {
         _generateMino();
         if (_gameOver()) {
         } else {
-          startMain();
+          _startMain();
         }
       },
     );
@@ -125,23 +125,24 @@ class PlayModel extends ChangeNotifier {
   bool _verifyGround() {
     bool _ground = false;
     _waitTimer?.cancel();
-    yPos += 1;
+    yPos++;
     _updateCurrentMino();
     // 設置していたら0.5秒間の待ち時間を起動する
     if (_onCollisionEnter(currentMino)) {
-      groundCount += 1;
+      groundCount++;
+      // 回転と移動操作があった場合は待ち時間をリセットする
+      // ただし15回まで
       if (groundCount < 16) {
         _mainTimer?.cancel();
         wait = true;
         startWaitTime();
       } else {
-        yPos -= 1;
+        yPos--;
         _updateCurrentMino();
         for (List<int> e in currentMino) {
           fixedMino.add([e[0], e[1]]);
         }
         _deleteMino();
-        yPos += 1;
         wait = false;
         _waitTimer?.cancel();
         _generateMino();
@@ -151,9 +152,9 @@ class PlayModel extends ChangeNotifier {
       _ground = true;
     } else {
       wait = false;
-      startMain();
+      _startMain();
     }
-    yPos -= 1;
+    yPos--;
     _updateCurrentMino();
     return _ground;
   }
@@ -338,7 +339,7 @@ class PlayModel extends ChangeNotifier {
     _updateCurrentMino();
     wait = false;
     _waitTimer?.cancel();
-    startMain();
+    _startMain();
     _gameOver();
     notifyListeners();
   }
@@ -403,7 +404,7 @@ class PlayModel extends ChangeNotifier {
       orderMino[(index + 5) % 14],
       orderMino[(index + 6) % 14],
     ];
-    index += 1;
+    index++;
     usedHold = false;
     wait = false;
     groundCount = 0;
@@ -433,7 +434,6 @@ class PlayModel extends ChangeNotifier {
 
   // predict drop position
   _predictDropPos() {
-    bool _enter = false;
     if (futureMino.isEmpty) {
       futureMino = [
         [0, 0],
@@ -442,9 +442,7 @@ class PlayModel extends ChangeNotifier {
         [0, 0],
       ];
     }
-    yPosFuture = yPos;
-    while (_enter == false) {
-      yPosFuture++;
+    for (yPosFuture = yPos; yPosFuture < 21; yPosFuture++) {
       Mino.mino[indexMino][angle].asMap().forEach(
         (index, value) {
           futureMino[index][0] = value[0] + xPos;
@@ -456,8 +454,8 @@ class PlayModel extends ChangeNotifier {
         futureMino.forEach((element) {
           element[1]--;
         });
-        _enter = true;
         notifyListeners();
+        return 0;
       }
     }
   }
