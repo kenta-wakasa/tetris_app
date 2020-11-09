@@ -15,6 +15,7 @@ class PlayModel extends ChangeNotifier {
   int indexMino = 0;
   int groundCount = 0;
   int indexHold = -1;
+  int countDeletedLine = 0;
   bool usedHold = false;
   bool gameOver = false;
   bool wait = false;
@@ -79,6 +80,7 @@ class PlayModel extends ChangeNotifier {
     indexHold = -1;
     angle = 0;
     groundCount = 0;
+    countDeletedLine = 0;
     nextMinoList.clear();
     fixedMino.clear();
     currentMino.clear();
@@ -484,6 +486,7 @@ class PlayModel extends ChangeNotifier {
         if (fixedMino.where((element) => element[1] == index).length == 10) {
           // delete row
           fixedMino.removeWhere((element) => element[1] == index);
+          countDeletedLine++;
           // drop upper mino
           fixedMino.where((element) => element[1] < index).forEach((element) {
             element[1]++;

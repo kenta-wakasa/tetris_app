@@ -146,7 +146,22 @@ class PlayPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        model.countDeletedLine.toString(),
+                        style: TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 80,
+                      ),
+                    ],
+                  ),
+                ),
                 model.gameOver
                     ? Center(
                         child: Container(
@@ -161,6 +176,16 @@ class PlayPage extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                     fontSize: 36),
+                              ),
+                              SizedBox(
+                                height: 24,
+                              ),
+                              Text(
+                                '${model.countDeletedLine}ライン達成!!',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 24),
                               ),
                               SizedBox(
                                 height: 240,
